@@ -44,7 +44,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 
 6. check that BLAST settings are appropriate (R)
 	mkdir plots
-	RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 7. recover sequence IDs left out of blast (python, bash)
 	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
@@ -58,7 +58,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 
-10. combine taxonomy files (terminal)
+10. combine taxonomy files (bash)
 	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 11. assign taxonomy with general database only (mothur, bash)
@@ -97,7 +97,7 @@ NOTE: steps 1-14 can be run in a block using the bash scripts:
 		mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 		mkdir conflicts_forcing
 		Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
-		Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+		Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 16. tidy up (bash)
 	rm custom.db.* custom.8mer custom.custom* custom.tree* general.8mer general.general* general.tree* *wang* mothur.*.logfile otus.custom.blast* ids* otus.below*.fasta otus.above*.fasta otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otus.custom.taxonomy otus.custom.[0-9]* custom.general* *pvalues total* final*names
@@ -249,11 +249,16 @@ Syntax of commands and what each argument does:
 				simply keeping the edited file the same name  
 	rm filename
 		rm		this removes (aka deletes) the file named filename
-		
+
+***** add to just use the shell script reformat_greengenes.sh instead. ****		
 ___________
 
-The Silva database... ***add formatting advice***
-			*************
+The Silva database... 
+
+***** made shell script reformat_silva.sh but it doesn't work b/c silva is stupid. 
+there's no way to make a compatible file without opening it in ARB and exporting in a different format yourself.
+mothur and qiime did it for you, but they're also out of date. wtf SILVA? literally noone could use that format for anything.
+(see analysis notes 12-5-16 for this saga) *****
 
 ______________________
 
@@ -287,6 +292,8 @@ What the commands are:
 	aligned.fasta	the name of your aligned fasta file
 	otus.fasta		the name of the reformatted file you're creating
 
+NOTE: this removes hyphens from everywhere, so if you had hyphens in your seqID names you have to also remove
+hyphens from the names in your abund file. SeqIDs must match exactly btwn the two files (tho order doesn't matter)
 _____________________________________________
 
 II. Your OTU files:
@@ -524,7 +531,7 @@ be a problem.  Generate some plots with the R script plot_blast_hit_stats.R.
 
 Full Two Commands (type in the terminal)
 mkdir plots
-RScript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
 
 What mkdir bash command does:
 	mkdir		stands for "make directory", this creates a new folder
@@ -849,16 +856,16 @@ This script also allows the user to choose a bootstrap %confidence cutoff under 
 the lower assignments are unclassified.  The script does not include unclassified names in 
 its reporting of disagreements.  This allows you ignore taxonomy assignment conflicts when
 you don't trust the assignment anyway, and you can decide what you trust (60% is generally
-considered the minimum cutoff you should use.)
+considered the minimum cutoff you should use, 80% is the default in the mothur MiSeq SOP.)
 
 Additionally, this script generates a final version of your taxonomy file with the applied 
-bootstrap cutoff implemented.  The version made in step 9 contains all the taxonomy assignments,
+bootstrap cutoff implemented.  The version made in step 10 contains all the taxonomy assignments,
 even ones with very low bootstrap p-values.  This generates a .taxonomy file with the cutoff
 applied, so that everything under that cutoff is named "unclassified."  Note that you can 
 apply this cutoff in step 9 using the "cutoff = #" flag with the mothur command classify.seqs().
 I didn't do it there though to make these analysis steps more flexible. The format of this file
-is semicolon delimited, which is slightly different than the mothur output files that are tab 
-semicolon deliminited between taxonomy levels but tab delimited between the seqID column and
+is comma delimited, which is slightly different than the mothur output files that are 
+semicolon deliminited between taxonomy levels and tab delimited between the seqID column and
 the taxonomy names.
 
 Note: you must create a new folder to save these results in before running the script.
@@ -1086,7 +1093,7 @@ mv otus.custom.taxonomy.reformatted otus.custom.taxonomy
 mkdir conflicts_forcing
 Rscript find_classification_disagreements.R otus.custom.taxonomy otus.98.85.70.taxonomy ids.above.98 conflicts_forcing NA 85 70 forcing
 
-Rscript plot_classification_disagreements.R NA plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
+Rscript plot_classification_disagreements.R otus.abund plots conflicts_forcing otus.custom.85.taxonomy otus.98.85.70.taxonomy
 
 What the arguments are (this second time you source the script):
 1.		Rscript									same
@@ -1184,11 +1191,11 @@ otus.[0-9][0-9].taxonomy otus.[0-9][0-9][0-9].taxonomy otus.general.taxonomy otu
 					re-run step 11 with an additional "cutoff=" flag.
 
 *pvalues total*	final*names
-				These are files generated in step 14 to use in 15.5.a:	final.general.pvalues
+				These are files generated in step 13 to use in 15.5.a:	final.general.pvalues
 																		final.taxonomy.pvalues
-																		total.reads.per.seqID.csv
 																		final.general.names
 																		final.taxonomy.names
+				This file is generated in optional step 14 or 15:	total.reads.per.seqID.csv
 
 Note: if for some reason you want to keep these files, you can either skip this step
 or instead of rm use the `mv filenames foldername` command to move them to a folder instead.
