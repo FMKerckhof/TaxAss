@@ -55,20 +55,23 @@ Unless stated otherwise, all commands below are entered in terminal window.
 	 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
 	 cat ids.below.98 ids.missing > ids.below.98.all
   ```  
-9. create fasta files of desired sequence IDs (python)
+9. Create fasta files of desired sequence IDs (python)
   ```bash
 	 python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
 	 python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
   ``` 
+10. Assign taxonomy (mothur)
+  ```bash
+	 mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)" #WHY is the cutoff 0?
+  ``` 
+
+11. Combine taxonomy files (bash)
+  ```bash
+	 cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
+  ``` 
 
 	
-
-9. assign taxonomy (mothur)
-	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
-	mothur "#classify.seqs(fasta=otus.below.98.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
-
-10. combine taxonomy files (bash)
-	cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
 
 11. assign taxonomy with general database only (mothur, bash)
 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
