@@ -12,13 +12,15 @@ Unless stated otherwise, all commands below are entered in terminal window.
 2. Format files (textwrangler or bash)
     + For the Green Genes (GG) database as general.taxonomy:
       ```bash
-       sed 's/ //g' <general.taxonomy >NoSpaces
-       sed 's/$/;/' <NoSpaces >EndLineSemicolons
+       sed 's/ //g' < general.taxonomy >NoSpaces
+       sed 's/$/;/' < NoSpaces >EndLineSemicolons
        mv EndLineSemicolons general.taxonomy
        rm NoSpaces
       ```
     + For aligned fasta files:
-      `sed 's/-//g' <aligned.fasta >otus.fasta`
+      ```Shell
+       sed 's/-//g' <aligned.fasta >otus.fasta
+      ```
 3. Make BLAST database file (blast+)
 
 
