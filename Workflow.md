@@ -8,8 +8,7 @@ a small, custom taxonomy database and a large general database.
 
 Unless stated otherwise, all commands below are entered in terminal window.
 
-1. Background and why we chose this workflow
-2. Format files (textwrangler or bash)
+1. Format files (textwrangler or bash)
     + For the Green Genes (GG) database as general.taxonomy:
       ```bash
        sed 's/ //g' < general.taxonomy >NoSpaces
@@ -25,37 +24,44 @@ Unless stated otherwise, all commands below are entered in terminal window.
       ```bash
        Rscript reformat_mothur_OTU_tables.R StupidLongMothurName.count_table count_table otus.abund
       ```
-3. make BLAST database file (blast+)
+2. Make BLAST database file (blast+)
   ```bash
 	 makeblastdb -dbtype nucl -in custom.fasta -input_type fasta -parse_seqids -out custom.db
   ```
-4. run BLAST (blast+)
+3. Run BLAST (blast+)
   ```bash
 	 blastn -query otus.fasta -task megablast -db custom.db -out otus.custom.blast -outfmt 11 -max_target_seqs 5
   ```
+4. Reformat blast results (blast+)
+  ```bash
+	 blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
+  ```
+5. Correct BLAST pident (R)
+  ```bash
+	 Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
+  ```
+6. Filter BLAST results (R)
+  ```bash
+	 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
+	 Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
+  ```
+7. Check that BLAST settings are appropriate (R)
+  ```bash
+	 mkdir plots
+	 Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
+  ```
+8. Recover sequence IDs left out of blast (python, bash)
+  ```bash
+	 python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
+	 cat ids.below.98 ids.missing > ids.below.98.all
+  ```  
+9. create fasta files of desired sequence IDs (python)
+  ```bash
+	 python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
+	 python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
+  ``` 
+
 	
-
-3. reformat blast results (blast)
-	blast_formatter -archive otus.custom.blast -outfmt "6 qseqid pident length qlen qstart qend" -out otus.custom.blast.table
-
-4. correct BLAST pident (R)
-	Rscript calc_full_length_pident.R otus.custom.blast.table otus.custom.blast.table.modified
-
-5. filter BLAST results (R)
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.above.98 98 TRUE 
-	Rscript filter_seqIDs_by_pident.R otus.custom.blast.table.modified ids.below.98 98 FALSE
-
-6. check that BLAST settings are appropriate (R)
-	mkdir plots
-	Rscript plot_blast_hit_stats.R otus.custom.blast.table.modified 98 plots
-
-7. recover sequence IDs left out of blast (python, bash)
-	python find_seqIDs_blast_removed.py otus.fasta otus.custom.blast.table.modified ids.missing
-	cat ids.below.98 ids.missing > ids.below.98.all
-	
-8. create fasta files of desired sequence IDs (python)
-	python create_fastas_given_seqIDs.py ids.above.98 otus.fasta otus.above.98.fasta
-	python create_fastas_given_seqIDs.py ids.below.98.all otus.fasta otus.below.98.fasta
 
 9. assign taxonomy (mothur)
 	mothur "#classify.seqs(fasta=otus.above.98.fasta, template=custom.fasta,  taxonomy=custom.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
@@ -109,6 +115,9 @@ Unless stated otherwise, all commands below are entered in terminal window.
 	mkdir data ; mv otus* data
 	mkdir databases ; mv *.taxonomy *.fasta databases
 
+## More detailled commands and explanation
+
+### Background and why we chose this workflow
 
 # Dependencies
 
