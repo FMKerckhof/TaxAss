@@ -70,24 +70,29 @@ Unless stated otherwise, all commands below are entered in terminal window.
   ```bash
 	 cat otus.above.98.custom.wang.taxonomy otus.below.98.general.wang.taxonomy > otus.98.taxonomy
   ``` 
-
-	
-
-11. assign taxonomy with general database only (mothur, bash)
-	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+12. Assign taxonomy with general database only (mothur, bash)
+	```bash
+	 	mothur "#classify.seqs(fasta=otus.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
 	cat otus.general.wang.taxonomy > otus.general.taxonomy
+  ``` 
 
-11.5 OPTIONAL- feeds into Database_Improvement_Workflow
-	assign taxonomy to custom database with general database (mothur, bash)
-	mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
-	cat custom.general.wang.taxonomy custom.general.taxonomy
+13. OPTIONAL- feeds into Database_Improvement_Workflow - assign taxonomy to custom database with general database (mothur, bash)
+  ```bash
+	 mothur "#classify.seqs(fasta=custom.fasta, template=general.fasta, taxonomy=general.taxonomy, method=wang, probs=T, processors=2, cutoff=0)"
+	cat custom.general.wang.taxonomy > custom.general.taxonomy
+  ``` 
 
-12. reformat taxonomy files (bash)
-	sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
-	mv otus.98.taxonomy.reformatted otus.98.taxonomy
-	sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
-	mv otus.general.taxonomy.reformatted otus.general.taxonomy
-	
+14. Reformat taxonomy files (bash)
+  ```bash
+	  sed 's/[[:blank:]]/\;/' <otus.98.taxonomy >otus.98.taxonomy.reformatted
+	  mv otus.98.taxonomy.reformatted otus.98.taxonomy
+	  sed 's/[[:blank:]]/\;/' <otus.general.taxonomy >otus.general.taxonomy.reformatted
+	  mv otus.general.taxonomy.reformatted otus.general.taxonomy
+  ``` 
+
+
+
+
 13. compare taxonomy files (R)
 	mkdir conflicts_98
 	Rscript find_classification_disagreements.R otus.98.taxonomy otus.general.taxonomy ids.above.98 conflicts_98 98 85 70
